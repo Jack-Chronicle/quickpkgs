@@ -130,7 +130,7 @@
           };
 
           home.packages = with pkgs; [
-            python3Full
+            python3Minimal
             pipx
             nodePackages_latest.nodejs
             eget
