@@ -48,4 +48,4 @@ imports = [
 
 ## Requirements
 
-- Your system must have `python3Full`, `pipx`, `nodejs`, and `eget` available via nixpkgs (included automatically by the module).
+- Your system must have `python3Minimal`, `pipx`, `nodejs`, and `eget` available via nixpkgs (included automatically by the module).
