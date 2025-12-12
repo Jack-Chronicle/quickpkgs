@@ -100,7 +100,10 @@
                 matches_found=false
                 for pkg in ${joinQuoted config.npm.packages}; do
                   clean_pkg=$(echo "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                  nix_matches=$(${pkgs.nix}/bin/nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  nix_matches=""
+                  if command -v nix >/dev/null 2>&1; then
+                    nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  fi
                   if [ -n "$nix_matches" ]; then
                     matches_found=true
                     echo "possible Nixpkg matches found for '$pkg':"
@@ -139,7 +142,10 @@
                 matches_found=false
                 for pkg in ${joinQuoted config.pipx.packages}; do
                   clean_pkg=$(echo "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                  nix_matches=$(${pkgs.nix}/bin/nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  nix_matches=""
+                  if command -v nix >/dev/null 2>&1; then
+                    nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  fi
                   if [ -n "$nix_matches" ]; then
                     matches_found=true
                     echo "possible Nixpkg matches found for '$pkg':"
@@ -184,7 +190,10 @@
                 matches_found=false
                 for pkg in ${joinQuoted config.eget.packages}; do
                   clean_pkg=$(basename "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                  nix_matches=$(${pkgs.nix}/bin/nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  nix_matches=""
+                  if command -v nix >/dev/null 2>&1; then
+                    nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
+                  fi
                   if [ -n "$nix_matches" ]; then
                     matches_found=true
                     echo "possible Nixpkg matches found for '$pkg':"
