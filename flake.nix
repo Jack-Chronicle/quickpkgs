@@ -172,7 +172,7 @@
                 echo "Error: uv not found, please install uv via nixpkgs"
                 exit 1
               fi
-          
+
               mkdir -p ${config.uv.path}
               export UV_TOOLS_DIR=${config.uv.path}
               export PATH=${config.uv.path}:$PATH
@@ -198,7 +198,7 @@
               fi
 
               mkdir -p ${config.cargo.path}
-              export CARGO_HOME=${config.cargo.path}
+              export OUT_DIR=${config.cargo.path}
               export PATH=${config.cargo.path}:$PATH
 
               for pkg in ${joinQuoted config.cargo.packages}; do
@@ -241,7 +241,7 @@
               # Go build environment is now guaranteed to be in PATH
               export PATH=${toolEnv}/bin:$PATH
               export CGO_ENABLED=1
-              
+
               if ! command -v go >/dev/null 2>&1; then
                 echo "Error: go not found in build environment"
                 exit 1
@@ -250,7 +250,7 @@
                 echo "Error: gcc not found in build environment"
                 exit 1
               fi
-              
+
               mkdir -p ${config.go.path}
               export PATH=${config.go.path}:$PATH
               export GOBIN=${config.go.path}
