@@ -26,18 +26,24 @@
         pkgs,
         ...
       }: let
-        joinQuoted = list: lib.concatMapStringsSep " " (pkg: ''"${pkg}"'') list;
-        
-        # Build environment with all Go tools available during activation
-        goEnv = pkgs.buildEnv {
-          name = "go-build-env";
-          paths = with pkgs; [
-            go
-            gcc
-            pkg-config
-            gnumake
-          ];
-        };
+      joinQuoted = list: lib.concatMapStringsSep " " (pkg: ''"${pkg}"'') list;
+
+      # Shared build environment with common toolchains
+      toolEnv = pkgs.buildEnv {
+        name = "dev-tools-env";
+        paths = with pkgs; [
+          # language toolchains
+          go
+          cargo
+          nodePackages_latest.nodejs
+
+          # C toolchain + build tools
+          gcc
+          pkg-config
+          gnumake
+          binutils
+        ];
+      };
       in {
         options = {
           npm = {
@@ -130,17 +136,14 @@
         config = {
           home.packages = with pkgs; [
             uv
-            nodePackages_latest.nodejs
-            cargo
-            cargo-c
             eget
-            goEnv
+            toolEnv
           ];
 
           home.activation.installNpmPackages =
             if config.npm.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
-              export PATH=${pkgs.nodePackages_latest.nodejs}/bin:$PATH
+              export PATH=${toolEnv}/bin:$PATH
               if ! command -v npm >/dev/null 2>&1; then
                 echo "Error: npm not found, please install npm via nixpkgs"
                 exit 1
@@ -164,6 +167,7 @@
             if config.uv.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
               export PATH=${pkgs.uv}/bin:$PATH
+              export PATH=${toolEnv}/bin:$PATH
               if ! command -v uv >/dev/null 2>&1; then
                 echo "Error: uv not found, please install uv via nixpkgs"
                 exit 1
@@ -187,7 +191,7 @@
           home.activation.installCargoPackages =
             if config.cargo.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
-              export PATH=${pkgs.cargo}/bin:$PATH
+              export PATH=${toolEnv}/bin:$PATH
               if ! command -v cargo >/dev/null 2>&1; then
                 echo "Error: cargo not found, please install cargo via nixpkgs"
                 exit 1
@@ -219,6 +223,7 @@
               mkdir -p ${config.eget.path}
               export EGET_BIN=${config.eget.path}
               export PATH=${config.eget.path}:$PATH
+              export PATH=${toolEnv}/bin:$PATH
 
               for pkg in ${joinQuoted config.eget.packages}; do
                 binname=$(basename $pkg)
@@ -234,7 +239,7 @@
             if config.go.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
               # Go build environment is now guaranteed to be in PATH
-              export PATH=${goEnv}/bin:$PATH
+              export PATH=${toolEnv}/bin:$PATH
               export CGO_ENABLED=1
               
               if ! command -v go >/dev/null 2>&1; then
