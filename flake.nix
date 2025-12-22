@@ -27,6 +27,17 @@
         ...
       }: let
         joinQuoted = list: lib.concatMapStringsSep " " (pkg: ''"${pkg}"'') list;
+        
+        # Build environment with all Go tools available during activation
+        goEnv = pkgs.buildEnv {
+          name = "go-build-env";
+          paths = with pkgs; [
+            go
+            gcc
+            pkg-config
+            gnumake
+          ];
+        };
       in {
         options = {
           npm = {
@@ -100,6 +111,14 @@
         };
 
         config = {
+          # Ensure Go build environment is available BEFORE activation scripts
+          home.packages = with pkgs; [
+            pipx
+            nodePackages_latest.nodejs
+            eget
+            goEnv  # This makes go/gcc available during activation
+          ];
+
           home.activation.installNpmPackages =
             if config.npm.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -174,16 +193,16 @@
           home.activation.installGoPackages =
             if config.go.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
-              # Add C compiler and build tools to PATH for cgo support
-              export PATH=${pkgs.gcc}/bin:${pkgs.pkg-config}/bin:$PATH
+              # Go build environment is now guaranteed to be in PATH
+              export PATH=${goEnv}/bin:$PATH
               export CGO_ENABLED=1
               
               if ! command -v go >/dev/null 2>&1; then
-                echo "Error: go not found, please install go via nixpkgs"
+                echo "Error: go not found in build environment"
                 exit 1
               fi
               if ! command -v gcc >/dev/null 2>&1; then
-                echo "Error: gcc not found, please install gcc via nixpkgs"
+                echo "Error: gcc not found in build environment"
                 exit 1
               fi
               
@@ -194,10 +213,16 @@
               mkdir -p "$GOPATH"
 
               for pkg in ${joinQuoted config.go.packages}; do
-                binname=$(basename $pkg)
+                binname=$(basename "$pkg")
                 if [ ! -x "${config.go.path}/$binname" ]; then
                   echo "Installing Go package $pkg..."
-                  go install $pkg
+                  if go install "$pkg"; then
+                    echo "Successfully installed $pkg -> $binname"
+                  else
+                    echo "Warning: Failed to install $pkg (may require additional C libraries)"
+                  fi
+                else
+                  echo "$binname already exists, skipping..."
                 fi
               done
             ''
@@ -206,16 +231,9 @@
           home.sessionVariables = {
             PATH = "${config.npm.path}:${config.eget.path}:${config.pipx.path}:${config.go.path}:$PATH";
             GOPATH = "${config.home.homeDirectory}/.go";
+            GOBIN = "${config.home.homeDirectory}/.local/bin";
+            CGO_ENABLED = "1";
           };
-
-          home.packages = with pkgs; [
-            pipx
-            nodePackages_latest.nodejs
-            eget
-            go
-            gcc
-            pkg-config
-          ];
         };
       };
     };
