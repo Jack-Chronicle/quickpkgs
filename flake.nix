@@ -132,6 +132,7 @@
             uv
             nodePackages_latest.nodejs
             cargo
+            cargo-c
             eget
             goEnv
           ];
