@@ -131,6 +131,7 @@
           home.packages = with pkgs; [
             uv
             nodePackages_latest.nodejs
+            cargo
             eget
             goEnv
           ];
