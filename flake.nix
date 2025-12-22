@@ -3,7 +3,7 @@
 # --- QUICKPKGS
 # ---
 {
-  description = "Home Manager module: npm, uv, eget, go package installer";
+  description = "Home Manager module: npm, uv, cargo, eget, and go package installer";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
@@ -72,6 +72,23 @@
               type = lib.types.str;
               default = "${config.home.homeDirectory}/.local/bin";
               description = "Installation prefix path for uv packages.";
+            };
+          };
+          cargo = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable cargo package installation.";
+            };
+            packages = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              description = "List of cargo packages to install.";
+            };
+            path = lib.mkOption {
+              type = lib.types.str;
+              default = "${config.home.homeDirectory}/.local/bin";
+              description = "Installation prefix path for cargo packages.";
             };
           };
           eget = {
@@ -158,6 +175,30 @@
                 if ! uv tool list | grep -q "$pkg"; then
                   echo "Installing uv tool package $pkg..."
                   uv tool install $pkg
+                else
+                  echo "$pkg already installed, skipping..."
+                fi
+              done
+            ''
+            else null;
+
+          home.activation.installCargoPackages =
+            if config.cargo.enable
+            then lib.hm.dag.entryAfter ["writeBoundary"] ''
+              export PATH=${pkgs.cargo}/bin:$PATH
+              if ! command -v cargo >/dev/null 2>&1; then
+                echo "Error: cargo not found, please install cargo via nixpkgs"
+                exit 1
+              fi
+
+              mkdir -p ${config.cargo.path}
+              export CARGO_HOME=${config.cargo.path}
+              export PATH=${config.cargo.path}:$PATH
+
+              for pkg in ${joinQuoted config.cargo.packages}; do
+                if ! cargo install --list | grep -q "$pkg"; then
+                  echo "Installing cargo package $pkg..."
+                  cargo install $pkg
                 else
                   echo "$pkg already installed, skipping..."
                 fi
