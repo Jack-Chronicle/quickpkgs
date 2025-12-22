@@ -151,22 +151,9 @@
               fi
           
               mkdir -p ${config.uv.path}
-              export UV_TOOL_DIR=${config.uv.path}
+              export UV_TOOLS_DIR=${config.uv.path}
               export PATH=${config.uv.path}:$PATH
-          
-              for pkg in ${joinQuoted config.uv.packages}; do
-                binname=$(basename "$pkg" | sed 's/[@].*//')  # Extract base name (strip @version)
-                if [ -e "${config.uv.path}/$binname" ]; then
-                  if [ -d "${config.uv.path}/$binname" ]; then
-                    echo "Removing conflicting directory: $binname"
-                    rm -rf "${config.uv.path}/$binname"
-                  else
-                    echo "Removing existing binary: $binname"
-                    rm -f "${config.uv.path}/$binname"
-                  fi
-                fi
-              done
-          
+
               for pkg in ${joinQuoted config.uv.packages}; do
                 if ! uv tool list | grep -q "$pkg"; then
                   echo "Installing uv tool package $pkg..."
