@@ -3,7 +3,7 @@
 # --- QUICKPKGS
 # ---
 {
-  description = "Home Manager module: npm, pipx, eget, go package installer";
+  description = "Home Manager module: npm, uv, eget, go package installer";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
@@ -57,21 +57,21 @@
               description = "Installation prefix path for npm global packages.";
             };
           };
-          pipx = {
+          uv = {
             enable = lib.mkOption {
               type = lib.types.bool;
               default = true;
-              description = "Enable pipx package installation.";
+              description = "Enable uv package installation.";
             };
             packages = lib.mkOption {
               type = lib.types.listOf lib.types.str;
               default = [];
-              description = "List of pipx packages to install.";
+              description = "List of uv packages to install.";
             };
             path = lib.mkOption {
               type = lib.types.str;
               default = "${config.home.homeDirectory}/.local/bin";
-              description = "Installation prefix path for pipx packages.";
+              description = "Installation prefix path for uv packages.";
             };
           };
           eget = {
@@ -111,12 +111,11 @@
         };
 
         config = {
-          # Ensure Go build environment is available BEFORE activation scripts
           home.packages = with pkgs; [
-            pipx
+            uv
             nodePackages_latest.nodejs
             eget
-            goEnv  # This makes go/gcc available during activation
+            goEnv
           ];
 
           home.activation.installNpmPackages =
@@ -142,29 +141,25 @@
             ''
             else null;
 
-          home.activation.installPipxPackages =
-            if config.pipx.enable
+          home.activation.installUvPackages =
+            if config.uv.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
-              export PATH=${pkgs.pipx}/bin:$PATH
-              if ! command -v pipx >/dev/null 2>&1; then
-                echo "Error: pipx not found, please install pipx via nixpkgs"
+              export PATH=${pkgs.uv}/bin:$PATH
+              if ! command -v uv >/dev/null 2>&1; then
+                echo "Error: uv not found, please install uv via nixpkgs"
                 exit 1
               fi
-              mkdir -p ${config.pipx.path}
-              export PIPX_BIN_DIR=${config.pipx.path}
-              export PATH=${config.pipx.path}:$PATH
-
-              for pkg in ${joinQuoted config.pipx.packages}; do
-                if ! pipx list --short | grep -q "$pkg"; then
-                  echo "Installing pipx package $pkg..."
-                  pipx install $pkg
+          
+              mkdir -p ${config.uv.path}
+              export UV_TOOL_DIR=${config.uv.path}
+              export PATH=${config.uv.path}:$PATH
+          
+              for pkg in ${joinQuoted config.uv.packages}; do
+                if ! uv tool list | grep -q "$pkg"; then
+                  echo "Installing uv tool package $pkg..."
+                  uv tool install $pkg
                 fi
               done
-
-              if pipx list 2>&1 | grep -q "invalid interpreter"; then
-                echo "Detected invalid interpreters, running pipx reinstall-all..."
-                pipx reinstall-all
-              fi
             ''
             else null;
 
@@ -229,7 +224,7 @@
             else null;
 
           home.sessionVariables = {
-            PATH = "${config.npm.path}:${config.eget.path}:${config.pipx.path}:${config.go.path}:$PATH";
+            PATH = "${config.npm.path}:${config.eget.path}:${config.uv.path}:${config.go.path}:$PATH";
             GOPATH = "${config.home.homeDirectory}/.go";
             GOBIN = "${config.home.homeDirectory}/.local/bin";
             CGO_ENABLED = "1";
