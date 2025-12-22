@@ -171,21 +171,30 @@
           home.activation.installGoPackages =
             if config.go.enable
             then lib.hm.dag.entryAfter ["writeBoundary"] ''
-              export PATH=${pkgs.go}/bin:$PATH
+              # Add C compiler and build tools to PATH for cgo support
+              export PATH=${pkgs.gcc}/bin:${pkgs.pkg-config}/bin:$PATH
+              export CGO_ENABLED=1
+              
               if ! command -v go >/dev/null 2>&1; then
                 echo "Error: go not found, please install go via nixpkgs"
                 exit 1
               fi
+              if ! command -v gcc >/dev/null 2>&1; then
+                echo "Error: gcc not found, please install gcc via nixpkgs"
+                exit 1
+              fi
+              
               mkdir -p ${config.go.path}
               export PATH=${config.go.path}:$PATH
               export GOBIN=${config.go.path}
               export GOPATH=${config.home.homeDirectory}/.go
+              mkdir -p "$GOPATH"
 
               for pkg in ${joinQuoted config.go.packages}; do
                 binname=$(basename $pkg)
                 if [ ! -x "${config.go.path}/$binname" ]; then
                   echo "Installing Go package $pkg..."
-                  go install $pkg
+                  go install $pkg || echo "Warning: Failed to install $pkg (may require additional C libraries)"
                 fi
               done
             ''
