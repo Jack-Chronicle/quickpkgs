@@ -157,7 +157,7 @@
               for pkg in ${joinQuoted config.uv.packages}; do
                 if ! uv tool list | grep -q "$pkg"; then
                   echo "Installing uv tool package $pkg..."
-                  uv tool install $pkg
+                  uv tool install --force $pkg
                 fi
               done
             ''
