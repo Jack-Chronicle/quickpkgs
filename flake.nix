@@ -95,29 +95,9 @@
                   ln -s "${config.home.homeDirectory}/.local/share/npm/bin/" "${config.npm.path}"
                 fi
 
-                # Search nixpkgs for npm package alternatives
-                # echo "Searching nixpkgs for npm package alternatives..."
-                # matches_found=false
-                # for pkg in ${joinQuoted config.npm.packages}; do
-                #   clean_pkg=$(echo "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                #   nix_matches=""
-                #   if command -v nix >/dev/null 2>&1; then
-                #     nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
-                #   fi
-                #   if [ -n "$nix_matches" ]; then
-                #     matches_found=true
-                #     echo "possible Nixpkg matches found for '$pkg':"
-                #     echo "$nix_matches"
-                #   fi
-                # done
-                # if [ "$matches_found" = false ]; then
-                #   echo "No nixpkgs matches found for npm packages."
-                # fi
-                # echo
-
                 for pkg in ${joinQuoted config.npm.packages}; do
                   if ! npm list -g --depth=0 | grep -q "$pkg@"; then
-                    echo "Installing npm package $pkg globally..."
+                    echo "Installing npm package $pkg..."
                     npm install -g $pkg
                   fi
                 done
@@ -136,26 +116,6 @@
                 mkdir -p ${config.pipx.path}
                 export PIPX_BIN_DIR=${config.pipx.path}
                 export PATH=${config.pipx.path}:$PATH
-
-                # Search nixpkgs for pipx package alternatives
-                # echo "Searching nixpkgs for pipx package alternatives..."
-                # matches_found=false
-                # for pkg in ${joinQuoted config.pipx.packages}; do
-                #   clean_pkg=$(echo "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                #   nix_matches=""
-                #   if command -v nix >/dev/null 2>&1; then
-                #     nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
-                #   fi
-                #   if [ -n "$nix_matches" ]; then
-                #     matches_found=true
-                #     echo "possible Nixpkg matches found for '$pkg':"
-                #     echo "$nix_matches"
-                #   fi
-                # done
-                # if [ "$matches_found" = false ]; then
-                #   echo "No nixpkgs matches found for pipx packages."
-                # fi
-                # echo
 
                 for pkg in ${joinQuoted config.pipx.packages}; do
                   if ! pipx list --short | grep -q "$pkg"; then
@@ -184,26 +144,6 @@
                 mkdir -p ${config.eget.path}
                 export EGET_BIN=${config.eget.path}
                 export PATH=${config.eget.path}:$PATH
-
-                # Search nixpkgs for eget package alternatives
-                # echo "Searching nixpkgs for eget package alternatives..."
-                # matches_found=false
-                # for pkg in ${joinQuoted config.eget.packages}; do
-                #   clean_pkg=$(basename "$pkg" | sed 's/^[[:space:][:punct:]]*//; s/[[:space:][:punct:]]*$//; s/[[:punct:]]/ /g')
-                #   nix_matches=""
-                #   if command -v nix >/dev/null 2>&1; then
-                #     nix_matches=$(nix search nixpkgs "$clean_pkg" 2>/dev/null | grep -v '^$' | head -5)
-                #   fi
-                #   if [ -n "$nix_matches" ]; then
-                #     matches_found=true
-                #     echo "possible Nixpkg matches found for '$pkg':"
-                #     echo "$nix_matches"
-                #   fi
-                # done
-                # if [ "$matches_found" = false ]; then
-                #   echo "No nixpkgs matches found for eget packages."
-                # fi
-                # echo
 
                 for pkg in ${joinQuoted config.eget.packages}; do
                   binname=$(basename $pkg)
