@@ -194,7 +194,7 @@
                 binname=$(basename $pkg)
                 if [ ! -x "${config.go.path}/$binname" ]; then
                   echo "Installing Go package $pkg..."
-                  go install $pkg || echo "Warning: Failed to install $pkg (may require additional C libraries)"
+                  go install $pkg
                 fi
               done
             ''
@@ -210,6 +210,8 @@
             nodePackages_latest.nodejs
             eget
             go
+            gcc
+            pkg-config
           ];
         };
       };
