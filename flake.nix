@@ -197,7 +197,10 @@
                 exit 1
               fi
 
+              export CARGO_INSTALL_ROOT=${config.cargo.path}
               export PATH=${config.cargo.path}:$PATH
+              export PATH=${config.cargo.path}:$PATH
+
               mkdir -p ${config.home.homeDirectory}/.local/share/cargo/bin
               # if [ ! -L "${config.cargo.path}" ]; then
               #   ln -s "${config.home.homeDirectory}/.local/share/cargo/bin/" "${config.cargo.path}"
@@ -256,7 +259,7 @@
               mkdir -p ${config.go.path}
               export PATH=${config.go.path}:$PATH
               export GOBIN=${config.go.path}
-              export GOPATH=${config.home.homeDirectory}/.go
+              export GOPATH=${config.home.homeDirectory}/.local/share/go
               mkdir -p "$GOPATH"
 
               for pkg in ${joinQuoted config.go.packages}; do
@@ -276,9 +279,9 @@
             else null;
 
           home.sessionVariables = {
-            PATH = "${config.npm.path}:${config.eget.path}:${config.uv.path}:${config.go.path}:$PATH";
-            GOPATH = "${config.home.homeDirectory}/.go";
-            GOBIN = "${config.home.homeDirectory}/.local/bin";
+            PATH = "${config.npm.path}:${config.eget.path}:${config.uv.path}:${config.go.path}:${config.cargo.path}:$PATH";
+            GOPATH = "${config.home.homeDirectory}/.local/share/go";
+            GOBIN = "${config.go.path}";
             CGO_ENABLED = "1";
           };
         };
