@@ -197,6 +197,7 @@
                 exit 1
               fi
 
+              mkdir -p ${config.home.homeDirectory}/.local/share/cargo
               export CARGO_HOME=${config.home.homeDirectory}/.local/share/cargo
               export PATH=${config.cargo.path}:$PATH
               if [ ! -L "${config.cargo.path}" ]; then
