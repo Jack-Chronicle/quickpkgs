@@ -264,8 +264,7 @@
                 binname=$(basename "$pkg")
                 if [ ! -x "${config.go.path}/$binname" ]; then
                   echo "Installing Go package $binname..."
-                  if go install "$pkg"; then
-                  else
+                  if ! go install "$pkg"; then
                     echo "Warning: Failed to install $pkg (may require additional C libraries)"
                   fi
                 else
