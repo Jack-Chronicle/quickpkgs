@@ -197,7 +197,7 @@
                 exit 1
               fi
 
-              export CARGO_INSTALL_ROOT=${config.cargo.path}
+              # export CARGO_INSTALL_ROOT=${config.cargo.path}
               export PATH=${config.cargo.path}:$PATH
               export PATH=${config.cargo.path}:$PATH
 
