@@ -197,19 +197,15 @@
                 exit 1
               fi
 
-              # export CARGO_INSTALL_ROOT=${config.cargo.path}
               export PATH=${config.cargo.path}:$PATH
-              export PATH=${config.cargo.path}:$PATH
-
-              mkdir -p ${config.home.homeDirectory}/.local/share/cargo/bin
-              # if [ ! -L "${config.cargo.path}" ]; then
-              #   ln -s "${config.home.homeDirectory}/.local/share/cargo/bin/" "${config.cargo.path}"
-              # fi
+              if [ ! -L "${config.cargo.path}" ]; then
+                ln -s "${config.home.homeDirectory}/.cargo/bin/" "${config.cargo.path}"
+              fi
 
               for pkg in ${joinQuoted config.cargo.packages}; do
                 if ! cargo install --list | grep -q "$pkg"; then
                   echo "Installing cargo package $pkg..."
-                  cargo install --root ${config.cargo.path} $pkg
+                  cargo install $pkg >> /dev/null
                 else
                   echo "$pkg already installed, skipping..."
                 fi
