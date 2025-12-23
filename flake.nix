@@ -206,7 +206,7 @@
               for pkg in ${joinQuoted config.cargo.packages}; do
                 if ! cargo install --list | grep -q "$pkg"; then
                   echo "Installing cargo package $pkg..."
-                  cargo install --root $CARGO_HOME $pkg >/dev/null 2>&1
+                  cargo install --path $CARGO_HOME --root /bin $pkg >/dev/null 2>&1
                 else
                   echo "$pkg already installed, skipping..."
                 fi
