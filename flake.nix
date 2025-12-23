@@ -207,7 +207,7 @@
               for pkg in ${joinQuoted config.cargo.packages}; do
                 if ! cargo install --list | grep -q "$pkg"; then
                   echo "Installing cargo package $pkg..."
-                  cargo install --root $CARGO_HOME $pkg
+                  cargo install --root $CARGO_HOME $pkg >/dev/null 2>&1
                 else
                   echo "$pkg already installed, skipping..."
                 fi
@@ -263,9 +263,8 @@
               for pkg in ${joinQuoted config.go.packages}; do
                 binname=$(basename "$pkg")
                 if [ ! -x "${config.go.path}/$binname" ]; then
-                  echo "Installing Go package $pkg..."
+                  echo "Installing Go package $binname..."
                   if go install "$pkg"; then
-                    echo "Successfully installed $pkg -> $binname"
                   else
                     echo "Warning: Failed to install $pkg (may require additional C libraries)"
                   fi
