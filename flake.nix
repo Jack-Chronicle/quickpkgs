@@ -197,9 +197,10 @@
                 exit 1
               fi
 
+              export CARGO_HOME=${config.home.homeDirectory}/.local/share/cargo
               export PATH=${config.cargo.path}:$PATH
               if [ ! -L "${config.cargo.path}" ]; then
-                ln -s "${config.home.homeDirectory}/.cargo/bin/" "${config.cargo.path}"
+                ln -s "${config.home.homeDirectory}/.local/share/cargo/bin/" "${config.cargo.path}"
               fi
 
               for pkg in ${joinQuoted config.cargo.packages}; do
