@@ -149,6 +149,7 @@
                 exit 1
               fi
               export PATH=${config.npm.path}:$PATH
+              mkdir -p ${config.home.homeDirectory}/.local/share/npm/bin
               if [ ! -L "${config.npm.path}" ]; then
                 ln -s "${config.home.homeDirectory}/.local/share/npm/bin/" "${config.npm.path}"
               fi
