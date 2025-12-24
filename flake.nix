@@ -59,7 +59,7 @@
             };
             path = lib.mkOption {
               type = lib.types.str;
-              default = "${config.home.homeDirectory}/.local/bin";
+              default = "${config.home.homeDirectory}/.local/share/npm/bin";
               description = "Installation prefix path for npm global packages.";
             };
           };
@@ -76,7 +76,7 @@
             };
             path = lib.mkOption {
               type = lib.types.str;
-              default = "${config.home.homeDirectory}/.local/bin";
+              default = "${config.home.homeDirectory}/.local/share/uv/bin";
               description = "Installation prefix path for uv packages.";
             };
           };
@@ -93,7 +93,7 @@
             };
             path = lib.mkOption {
               type = lib.types.str;
-              default = "${config.home.homeDirectory}/.local/bin";
+              default = "${config.home.homeDirectory}/.local/share/cargo/bin";
               description = "Installation prefix path for cargo packages.";
             };
           };
@@ -127,7 +127,7 @@
             };
             path = lib.mkOption {
               type = lib.types.str;
-              default = "${config.home.homeDirectory}/.local/bin";
+              default = "${config.home.homeDirectory}/.local/share/go/bin";
               description = "Installation prefix path for Go packages.";
             };
           };
