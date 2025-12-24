@@ -16,7 +16,6 @@
   outputs = {
     self,
     nixpkgs,
-    config,
     home-manager,
     ...
   }: {
