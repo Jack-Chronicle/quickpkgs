@@ -63,6 +63,23 @@
               description = "Installation prefix path for npm global packages.";
             };
           };
+          pipx = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable pipx package installation.";
+            };
+            packages = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              description = "List of pipx packages to install.";
+            };
+            path = lib.mkOption {
+              type = lib.types.str;
+              default = "${config.home.homeDirectory}/.local/share/pipx/bin";
+              description = "Installation prefix path for pipx packages.";
+            };
+          };
           uv = {
             enable = lib.mkOption {
               type = lib.types.bool;
@@ -158,6 +175,31 @@
                 if ! npm list -g --depth=0 | grep -q "$pkg@"; then
                   echo "Installing npm package $pkg..."
                   npm install -g $pkg
+                fi
+              done
+            ''
+            else null;
+
+          home.activation.installPipxPackages =
+            if config.pipx.enable
+            then lib.hm.dag.entryAfter ["writeBoundary"] ''
+              export PATH=${pkgs.pipx}/bin:$PATH
+              export PATH=${toolEnv}/bin:$PATH
+              if ! command -v pipx >/dev/null 2>&1; then
+                echo "Error: pipx not found, please install pipx via nixpkgs"
+                exit 1
+              fi
+
+              mkdir -p ${config.pipx.path}
+              export PIPX_BIN_DIR=${config.pipx.path}
+              export PATH=${config.pipx.path}:$PATH
+
+              for pkg in ${joinQuoted config.pipx.packages}; do
+                if ! pipx list | grep -q "$pkg"; then
+                  echo "Installing pipx package $pkg..."
+                  pipx install $pkg
+                else
+                  echo "$pkg already installed, skipping..."
                 fi
               done
             ''
@@ -275,7 +317,7 @@
             else null;
 
           home.sessionVariables = {
-            PATH = "${config.npm.path}:${config.eget.path}:${config.uv.path}:${config.go.path}:${config.cargo.path}:$PATH";
+            PATH = "${config.npm.path}:${config.eget.path}:${config.pipx.path}:${config.uv.path}:${config.go.path}:${config.cargo.path}:$PATH";
             GOPATH = "${config.home.homeDirectory}/.local/share/go";
             GOBIN = "${config.go.path}";
             CGO_ENABLED = "1";
